@@ -83,7 +83,7 @@ class grid_env(object):
         
         wall = True
         while wall:
-            a1 =  np.where(np.random.multinomial(1,[0.35,0.15,0.35,0.15]))[0] # random ghost #up down right left
+            a1 =  np.where(np.random.multinomial(1,[0.25,0.25,0.25,0.25]))[0] # random ghost #up down right left
             #print(self.ghost1)
             wall = self._move(self.ghost1,a1)
         

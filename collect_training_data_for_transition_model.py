@@ -12,19 +12,20 @@ sp_li=[]
 env=grid.grid_env(True)
 s=env.reset()
 
-for count in range(1000):
+for count in range(5000):
 	
 	a=numpy.random.randint(0,4)
 	sp,r,done = env.step([a])
 	a_arr=utils.action_index_to_one_hot(a)
+
+	#add stuff to list
+	s_li.append(s[-2:])#just ghost
 
 	if done==True:
 		s=env.reset()
 	else:
 		s=sp
 
-	#add stuff to list
-	s_li.append(s[-2:])#just ghost
 	a_li.append(a)
 	sp_li.append(sp[-2:])#just ghost
 	#add stuff to list
