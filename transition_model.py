@@ -30,6 +30,7 @@ class neural_transition_model:
         self.activation_fn=model_params['activation_fn']
         self.learning_rate=model_params['learning_rate']
         self.observation_size=model_params['observation_size']
+        self.action_size=model_params['action_size']
         self.num_models=model_params['num_models']
         self.num_epochs=model_params['num_epochs']
         self.probs=[]
@@ -48,7 +49,8 @@ class neural_transition_model:
 
     def create_model(self):
         input_state = keras.layers.Input(shape=(self.observation_size,))
-        h=input_state
+        input_action = keras.layers.Input(shape=(self.action_size,))
+        h=keras.layers.concatenate([input_state,input_action])
         for l in range(self.num_hidden_layers):
             h=Dense(self.hidden_layer_nodes
                     ,activation=self.activation_fn
@@ -61,15 +63,17 @@ class neural_transition_model:
         
         output_state = Lambda(lambda x: x * 4)(output_state)#scale output
 
-        model=keras.models.Model(inputs=input_state, outputs=output_state)
+        model=keras.models.Model(inputs=[input_state,input_action], outputs=output_state)
         ad=optimizers.Adam(lr=self.learning_rate)
         model.compile(loss='mean_squared_error',optimizer=ad)
         return model
 
-    def regression(self,phi,y,w_li,iteration):
+    def regression(self,phi,acts,y,w_li,iteration):
         assert len(w_li)==self.num_models, "number of weights not equal to number of functions {} {}".format(len(w_li),self.num_models)
         for index, w in enumerate(w_li):
-            self.models[index].fit(x=phi,y=y,epochs=self.num_epochs, verbose=0,sample_weight=w)
+            self.models[index].fit(x=[phi,acts],y=y,epochs=self.num_epochs, verbose=0,sample_weight=w)
 
-    def predict(self,phi):
-        return [x.predict(phi) for x in self.models]
+    def predict(self,phi,acts):
+        return [x.predict([phi,acts]) for x in self.models]
+
+

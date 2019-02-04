@@ -11,9 +11,9 @@ import random
 
 class grid_env(object):
     ''' Grid world with stochastic ghosts '''
-    
+    max_cell=5
     def __init__(self,to_plot=True,grid=False):
-        world = np.zeros([5,5],dtype='int32')
+        world = np.zeros([self.max_cell,self.max_cell],dtype='int32')
         #world[1:6,1] = 1
         #world[1:3,4] = 1
         #world[4:6,4] = 1
@@ -27,12 +27,12 @@ class grid_env(object):
             fig = plt.figure()
             ax1 = fig.add_subplot(111,aspect='equal')
             ax1.axis('off')
-            plt.xlim([-1,8])
-            plt.ylim([-1,8])
+            plt.xlim([-1,self.max_cell])
+            plt.ylim([-1,self.max_cell])
             
             #colors = matplotlib.colors.ListerColormap()
-            for i in range(5):
-                for j in range(5):
+            for i in range(self.max_cell):
+                for j in range(self.max_cell):
                     if world[i,j]==1:
                         col = "black"
                     else:
@@ -72,13 +72,13 @@ class grid_env(object):
         # move pacman
         #print(self.pacman)
         self._move(self.pacman,a)
-            
+        ''' 
         # check collision
         dead = self._check_dead()
         if dead:
             r = -10
             return self.get_state(),r,dead
-            
+        ''' 
         # move ghosts
         
         wall = True
@@ -96,7 +96,7 @@ class grid_env(object):
         '''
         # check collision again
         dead = self._check_dead()
-        goal = np.all(self.pacman == np.array([4,4]))
+        goal = np.all(self.pacman == np.array([self.max_cell-1,self.max_cell-1]))
         '''
         else:
             if np.all(self.pacman == np.array([6,6])):
@@ -119,15 +119,7 @@ class grid_env(object):
         
 
     def get_state(self):
-        if not self.grid:
-            state = np.concatenate((self.pacman,self.ghost1))
-            #state = np.concatenate((self.pacman,self.ghost1''',self.ghost2'''))
-        else:
-            state = np.copy(self.world)
-            state = np.stack(state,np.zeros(5,5),np.zeros(5,5),np.zeros(5,5),axis=2)
-            state[self.pacman[0],self.pacman[1],1] = 1
-            state[self.ghost1[0],self.ghost1[1],2] = 1
-            #state[self.ghost2[0],self.ghost2[1],3] = 1
+        state = np.concatenate((self.pacman,self.ghost1))
         return state
     
     def plot(self):
@@ -142,8 +134,8 @@ class grid_env(object):
         self.fig.canvas.draw()
         
     def plot_predictions(self,world):
-        for i in range(5):
-            for j in range(5):
+        for i in range(self.max_cell):
+            for j in range(self.max_cell):
                 for k in range(3):
                     if k==1:
                         col = "yellow"
@@ -177,7 +169,7 @@ class grid_env(object):
             raise ValueError('move not possible')
             
         # check if move is possible
-        if s[0]<0 or s[0]>4 or s[1]<0 or s[1]>4: # out of grid
+        if s[0]<0 or s[0]>self.max_cell-1 or s[1]<0 or s[1]>self.max_cell-1: # out of grid
             wall = True
         elif np.all(self.world[s[0],s[1]] == 1): # wall
             wall = True
@@ -203,16 +195,16 @@ class grid_env(object):
 if __name__ == '__main__':
     grid = grid_env(True)
     s = grid.get_state()
-    for i in range(200): 
+    for i in range(10000): 
         a = random.sample(range(4),1)
-        print(a)
+        #print(a)
         s,r,dead = grid.step(a)
-        print(s)
+        #print(s)
         if not dead:
             grid.plot()
-            plt.pause(0.1)
+            plt.pause(0.01)
         else:
-            print('Died in step',i,', restarting')
+            print(r)
             s = grid.reset() 
     print(grid.get_state())
     print('Finished')

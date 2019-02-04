@@ -19,15 +19,18 @@ for count in range(5000):
 	a_arr=utils.action_index_to_one_hot(a)
 
 	#add stuff to list
-	s_li.append(s[-2:])#just ghost
-
+	s_li.append(s)#just ghost
 	if done==True:
 		s=env.reset()
 	else:
 		s=sp
+		#env.plot()
+		#plt.pause(0.1)
 
-	a_li.append(a)
-	sp_li.append(sp[-2:])#just ghost
+	a_arr=4*[0]
+	a_arr[a]=1
+	a_li.append(a_arr)
+	sp_li.append(sp)#just ghost
 	#add stuff to list
 
 s_li=numpy.array(s_li)

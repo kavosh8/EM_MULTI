@@ -69,20 +69,19 @@ class em_learner:
 		for n in range(self.N):#in this case \mean_x p(z|x)
 			self.learned_priors[n]=numpy.mean(w_li[n])
 
-	def m_step(self,tm,phi,y,w_li,iteration):
-		tm.regression(phi,y,w_li,iteration)#M step fits however many functions (fn)
+	def m_step(self,tm,phi,acts,y,w_li,iteration):
+		tm.regression(phi,acts,y,w_li,iteration)#M step fits however many functions (fn)
 		self.compute_learned_prior(w_li)# and the prior to maximize the lower bound.
 
-	def e_step(self,tm,phi,y,iteration_number):
+	def e_step(self,tm,phi,acts,y,iteration_number):
 		
-		line_labels=tm.predict(phi)# get y_hat from each fn, given x values. a list of numpy arrays
+		line_labels=tm.predict(phi,acts)# get y_hat from each fn, given x values. a list of numpy arrays
 		p_sample_given_z=self.log_likelihood(y,line_labels)# get log-likelihood of each sample=(x,y) coming from each fn
 														   # so this outputs a 2D matrix of size (num_samples,num_modes)
 		p_z_given_sample,obj=self.posterior(p_sample_given_z)#get posterior p(z|(x,y))
 		return p_z_given_sample,obj
 
-	def e_step_m_step(self,tm,phi,y,iteration):
-		w_li,obj=self.e_step(tm,phi,y,iteration)#E step computes posteriors w_li and EM objective obj
-		print(iteration,obj)
-		self.m_step(tm,phi,y,w_li,iteration)
+	def e_step_m_step(self,tm,phi,acts,y,iteration):
+		w_li,obj=self.e_step(tm,phi,acts,y,iteration)#E step computes posteriors w_li and EM objective obj
+		self.m_step(tm,phi,acts,y,w_li,iteration)
 		return obj
